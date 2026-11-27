@@ -1,0 +1,21 @@
+:root { --bg:#fff8ec; --card:#fff; --ink:#2b2b33; --accent:#2f6fde; --ok:#17783d; --no:#b3401e; --line:#e8ddc8; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin:0; background:var(--bg); color:var(--ink); font:18px/1.7 system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; word-break:keep-all; }
+main { max-width:720px; margin:0 auto; padding:16px; }
+h1 { margin:0; font-size:2rem; }
+h2 { margin:0 0 8px; font-size:1.3rem; }
+section { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px; margin:16px 0; }
+nav { display:flex; flex-wrap:wrap; gap:8px; }
+button { font:inherit; min-height:48px; padding:6px 18px; border-radius:12px; border:2px solid var(--accent); background:var(--accent); color:#fff; cursor:pointer; }
+button.secondary, nav button { background:var(--card); color:var(--accent); }
+nav button[aria-current="true"] { background:var(--accent); color:#fff; }
+button:disabled { opacity:.5; cursor:default; }
+input { font:inherit; font-size:1.3rem; width:6em; min-height:48px; padding:4px 12px; border:2px solid var(--line); border-radius:12px; text-align:center; }
+.row { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.question { font-weight:700; font-size:1.2rem; margin:0 0 12px; }
+.feedback { font-weight:700; margin:10px 0 0; min-height:1.7em; }
+.correct { color:var(--ok); }
+.wrong { color:var(--no); }
+section.solved { border:2px solid var(--ok); }
+.note { background:var(--bg); border-radius:12px; padding:10px 14px; margin:10px 0 0; }
