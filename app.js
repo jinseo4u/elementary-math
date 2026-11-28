@@ -1,4 +1,4 @@
-const DATA_URL = 'data/units-grade2-gugudan.json';
+const CURRICULUM_URL = 'data/curriculum-grade2.json';
 const $ = (id) => document.getElementById(id);
 
 function el(tag, props = {}, ...children) {
@@ -7,9 +7,12 @@ function el(tag, props = {}, ...children) {
   return node;
 }
 
+let curriculum;
 let unit;
 let current = 0;
 let solved = new Set();
+// 새로 만든 문제와 푼 기록은 화면에만 두고 저장하지 않음 (새로고침하면 처음 문제로 돌아감)
+const practice = new Map(); // lesson.id → { problems, solved }
 
 const storageKey = () => `solved:${unit.unitId}`;
 function load() {
@@ -49,7 +52,8 @@ function renderExample(example) {
     el('p', { className: 'question' }, example.question), list, button, answer);
 }
 
-function renderProblem(problem, number) {
+// record: 맞힌 문제를 기록할 Set, onSolved: 새로 맞혔을 때 할 일
+function renderProblem(problem, number, record, onSolved = () => {}) {
   const inputId = `input-${problem.id}`;
   const input = el('input', { id: inputId, type: 'text', inputMode: 'numeric', autocomplete: 'off', maxLength: 4 });
   input.setAttribute('aria-label', `${number}번 답`);
@@ -79,14 +83,13 @@ function renderProblem(problem, number) {
   input.oninput = () => say('');
   form.onsubmit = (event) => {
     event.preventDefault();
-    if (solved.has(problem.id)) return;
+    if (record.has(problem.id)) return;
     const value = input.value.trim();
     if (!/^\d+$/.test(value)) { say('숫자로 답을 써 주세요.', 'wrong'); return; }
     if (Number(value) === problem.answer) {
-      solved.add(problem.id);
-      save();
+      record.add(problem.id);
       markSolved();
-      renderProgress();
+      onSolved();
     } else {
       // 한 번 틀린 뒤에는 힌트와 풀이를 볼 수 있게 함
       say('다시 한 번 생각해 볼까요?', 'wrong');
@@ -96,8 +99,40 @@ function renderProblem(problem, number) {
     }
   };
 
-  if (solved.has(problem.id)) markSolved();
+  if (record.has(problem.id)) markSolved();
   return card;
+}
+
+function renderProblems(lesson) {
+  const container = el('div');
+  const makeButton = el('button', { type: 'button' }, '새 문제 만들기');
+  const backButton = el('button', { type: 'button', className: 'secondary' }, '처음 문제 보기');
+
+  const show = () => {
+    const set = practice.get(lesson.id);
+    const onSolved = () => { save(); renderProgress(); };
+    container.replaceChildren(...(set
+      ? [el('p', {}, '새로 만든 문제예요. 이 문제들은 푼 기록에 저장되지 않아요.'),
+        ...set.problems.map((p, i) => renderProblem(p, i + 1, set.solved))]
+      : lesson.problems.map((p, i) => renderProblem(p, i + 1, solved, onSolved))));
+    backButton.hidden = !set;
+  };
+
+  makeButton.onclick = () => {
+    practice.set(lesson.id, { problems: ProblemGenerator.generateProblems(lesson), solved: new Set() });
+    show();
+    container.querySelector('input').focus();
+  };
+  backButton.onclick = () => {
+    practice.delete(lesson.id);
+    show();
+    makeButton.focus();
+  };
+
+  show();
+  // generator 설정이 없는 차시는 새 문제를 만들 수 없음
+  if (!lesson.generator) return container;
+  return el('div', {}, container, el('div', { className: 'row' }, makeButton, backButton));
 }
 
 function render() {
@@ -105,32 +140,118 @@ function render() {
   renderProgress();
   $('lesson').replaceChildren(
     el('section', {}, el('h2', {}, lesson.title), el('p', {}, lesson.explanation)),
-    renderExample(lesson.example),
-    ...lesson.problems.map((p, i) => renderProblem(p, i + 1)),
+    ...(lesson.example ? [renderExample(lesson.example)] : []),
+    renderProblems(lesson),
   );
 }
 
-async function start() {
+async function fetchJson(url) {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`);
+  return response.json();
+}
+
+const LOAD_HELP = '파일을 직접 열지 말고, 프로젝트 폴더에서 "npm run dev"를 실행한 뒤 http://localhost:8000 으로 접속해 주세요.';
+
+// 주소 뒤의 #단원번호로 화면을 정함. 휴대폰의 뒤로 가기도 그대로 동작함
+const findUnit = (unitId) => curriculum.semesters
+  .flatMap((s) => s.units)
+  .find((u) => u.unitId === unitId && u.active);
+
+function renderMenu() {
+  $('menu-title').textContent = curriculum.title;
+  $('menu-message').hidden = true;
+  $('semesters').replaceChildren(...curriculum.semesters.map(({ semester, units }) =>
+    el('section', {}, el('h2', {}, `${semester}학기`),
+      el('div', { className: 'units' }, ...units.map((entry) => {
+        const button = el('button', { type: 'button', disabled: !entry.active },
+          el('span', {}, `${entry.number}. ${entry.title}`));
+        if (entry.active) button.onclick = () => { location.hash = entry.unitId; };
+        else button.append(el('span', { className: 'badge' }, '준비 중'));
+        return button;
+      })))));
+}
+
+// 늦게 도착한 단원 데이터가 지금 화면을 덮지 않도록 이동할 때마다 번호를 올림
+let visit = 0;
+const lastLesson = new Map(); // unitId → 마지막으로 본 차시
+
+function showView(id) {
+  $('menu').hidden = id !== 'menu';
+  $('unit').hidden = id !== 'unit';
+}
+
+function showMenu() {
+  showView('menu');
+  document.title = curriculum.title;
+}
+
+async function showUnit(entry) {
+  const thisVisit = visit;
+  showView('unit');
+  unit = undefined;
+  document.title = `${entry.title} - ${curriculum.title}`;
+  $('grade').textContent = '';
+  $('title').textContent = '불러오는 중…';
+  $('description').textContent = '';
+  $('progress').textContent = '';
+  $('tabs').replaceChildren();
+  $('lesson').replaceChildren();
+  $('reset').hidden = true;
   try {
-    const response = await fetch(DATA_URL);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    unit = await response.json();
+    const data = await fetchJson(entry.data);
+    if (thisVisit !== visit) return;
+    unit = data;
+    current = lastLesson.get(unit.unitId) || 0;
+    if (!unit.lessons[current]) current = 0;
     load();
     $('grade').textContent = `${unit.grade}학년 ${unit.semester}학기`;
     $('title').textContent = unit.unitTitle;
     $('description').textContent = unit.unitDescription;
-    $('reset').hidden = false;
-    $('reset').onclick = () => {
-      if (!confirm('푼 기록을 모두 지울까요?')) return;
-      solved.clear();
-      save();
-      render();
-    };
     render();
+    $('reset').hidden = false;
   } catch (error) {
+    if (thisVisit !== visit) return;
     console.error(error);
     $('title').textContent = '문제를 불러오지 못했어요';
-    $('description').textContent = '파일을 직접 열지 말고, 프로젝트 폴더에서 "npm run dev"를 실행한 뒤 http://localhost:8000 으로 접속해 주세요.';
+    $('description').textContent = LOAD_HELP;
+  }
+}
+
+function route() {
+  visit++;
+  if (unit) lastLesson.set(unit.unitId, current);
+  const entry = findUnit(location.hash.slice(1));
+  if (entry) return showUnit(entry);
+  unit = undefined;
+  showMenu();
+}
+
+// 화면을 옮긴 뒤에는 맨 위 제목부터 보이고 읽히게 함
+function navigate() {
+  route();
+  window.scrollTo(0, 0);
+  $($('unit').hidden ? 'menu-title' : 'title').focus({ preventScroll: true });
+}
+
+$('home').onclick = () => { location.hash = ''; };
+$('reset').onclick = () => {
+  if (!confirm('푼 기록을 모두 지울까요?')) return;
+  solved.clear();
+  for (const lesson of unit.lessons) practice.delete(lesson.id);
+  save();
+  render();
+};
+
+async function start() {
+  try {
+    curriculum = await fetchJson(CURRICULUM_URL);
+    renderMenu();
+    window.addEventListener('hashchange', navigate);
+    route();
+  } catch (error) {
+    console.error(error);
+    $('menu-message').textContent = `메뉴를 불러오지 못했어요. ${LOAD_HELP}`;
   }
 }
 

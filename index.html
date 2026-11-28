@@ -3,21 +3,30 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>곱셈구구 배우기</title>
+  <title>2학년 수학</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main>
-    <header>
-      <p id="grade"></p>
-      <h1 id="title">불러오는 중…</h1>
-      <p id="description"></p>
-      <p id="progress" aria-live="polite"></p>
-    </header>
-    <nav id="tabs" aria-label="차시 선택"></nav>
-    <div id="lesson"></div>
-    <button type="button" id="reset" class="secondary" hidden>처음부터 다시 풀기</button>
+    <div id="menu">
+      <h1 id="menu-title" tabindex="-1">2학년 수학</h1>
+      <p id="menu-message" aria-live="polite">불러오는 중…</p>
+      <div id="semesters"></div>
+    </div>
+    <div id="unit" hidden>
+      <button type="button" id="home" class="secondary">🏠 메인 메뉴</button>
+      <header>
+        <p id="grade"></p>
+        <h1 id="title" tabindex="-1"></h1>
+        <p id="description"></p>
+        <p id="progress" aria-live="polite"></p>
+      </header>
+      <nav id="tabs" aria-label="차시 선택"></nav>
+      <div id="lesson"></div>
+      <button type="button" id="reset" class="secondary" hidden>처음부터 다시 풀기</button>
+    </div>
   </main>
+  <script src="generator.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

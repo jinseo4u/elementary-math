@@ -27,16 +27,22 @@ jobs:
       - name: Collect site files
         run: |
           mkdir _site
-          cp -r index.html style.css app.js data _site/
+          cp -r index.html style.css app.js generator.js data _site/
 
       - name: Check data JSON
         run: |
-          data_url=$(sed -n "s/^const DATA_URL = '\(.*\)';$/\1/p" _site/app.js)
-          test -n "$data_url"
-          test -f "_site/$data_url"
           for f in _site/data/*.json; do
             python3 -m json.tool "$f" > /dev/null
           done
+          # 메뉴에서 활성화한 단원은 데이터 파일이 있어야 함
+          cd _site
+          python3 - <<'PY'
+          import json, os, sys
+          curriculum = json.load(open('data/curriculum-grade2.json', encoding='utf-8'))
+          missing = [u['data'] for s in curriculum['semesters'] for u in s['units']
+                     if u['active'] and not os.path.isfile(u['data'])]
+          sys.exit(f'데이터 파일이 없습니다: {missing}' if missing else 0)
+          PY
 
       - uses: actions/configure-pages@v6
 
