@@ -26,4 +26,24 @@ section.solved { border:2px solid var(--ok); }
 .units { display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap:12px; }
 .units button { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:72px; padding:8px 16px; font-size:1.25rem; font-weight:700; text-align:left; }
 .units button:disabled { opacity:1; background:#e9e9ec; border-color:#c9c9cf; color:#5c5c66; }
+.choices { display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap:12px; margin-bottom:12px; }
+.choices button { min-height:72px; font-size:1.4rem; font-weight:700; }
+.choices button.answer { opacity:1; background:var(--ok); border-color:var(--ok); color:#fff; }
+.visual { margin:0 0 12px; overflow-x:auto; }
+.clock { display:block; width:min(100%, 260px); height:auto; margin:0 auto; }
+.clock .face { fill:#fff; stroke:var(--ink); stroke-width:3; }
+.clock .tick { stroke:#77777f; stroke-width:1; }
+.clock .tick.major { stroke:var(--ink); stroke-width:2.5; }
+.clock .number { fill:var(--ink); font-size:17px; font-weight:700; }
+.clock .hand { stroke-linecap:round; }
+.clock .hour-hand { stroke:var(--no); stroke-width:7; }
+.clock .minute-hand { stroke:var(--accent); stroke-width:3.5; }
+.clock .pin { fill:var(--ink); }
+.data-table { border-collapse:collapse; margin:0 auto; text-align:center; line-height:1.4; font-size:clamp(.7rem, 3.9vw, 1rem); }
+.data-table caption { font-weight:700; margin-bottom:6px; }
+.data-table th, .data-table td { border:1px solid #8a8a93; padding:6px clamp(2px, 1.2vw, 8px); }
+.data-table th { background:var(--bg); }
+.graph td { min-width:2.6em; height:2.2em; }
+.graph tbody th { font-weight:400; }
+.graph tfoot td { border:0; }
 .badge { flex:none; font-size:.85rem; background:#fff; border-radius:999px; padding:2px 10px; }

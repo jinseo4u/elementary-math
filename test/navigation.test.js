@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const ProblemGenerator = require('../generator.js');
+const Visuals = require('../visuals.js');
 
 const root = path.join(__dirname, '..');
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
@@ -44,7 +45,7 @@ async function openApp({ hash = '', storage = new Map(), files = {}, hold } = {}
   const held = new Promise((resolve) => { release = resolve; });
   const requested = [];
   const context = {
-    document: { title: '', getElementById: (id) => ids.get(id), createElement: (tag) => new Node(tag) },
+    document: { title: '', getElementById: (id) => ids.get(id), createElement: (tag) => new Node(tag), createElementNS: (ns, tag) => new Node(tag) },
     location: {
       get hash() { return currentHash; },
       set hash(value) {
@@ -66,6 +67,7 @@ async function openApp({ hash = '', storage = new Map(), files = {}, hold } = {}
     console: { error() {} },
     ProblemGenerator,
   };
+  context.Visuals = { renderVisual: (visual) => Visuals.renderVisual(visual, context.document) };
   vm.runInNewContext(read('app.js'), context);
   await tick();
 
@@ -101,10 +103,10 @@ test('메인 메뉴에 제목과 학기별 단원이 순서대로 나온다', as
   ]);
 });
 
-test('곱셈구구만 누를 수 있고 나머지는 준비 중이다', async () => {
+test('2학기 단원만 누를 수 있고 1학기는 준비 중이다', async () => {
   const app = await openApp();
-  for (const button of app.unitButtons()) {
-    const ready = button.textContent.includes('곱셈구구');
+  for (const [i, button] of app.unitButtons().entries()) {
+    const ready = units[i].semester === 2;
     assert.equal(button.disabled, !ready, button.textContent);
     assert.equal(button.textContent.includes('준비 중'), !ready, button.textContent);
     if (!ready) await app.go(button);
@@ -213,4 +215,58 @@ test('활성 단원의 데이터 파일은 메뉴 정보와 일치한다', () =>
     assert.deepEqual([unit.grade, unit.semester, unit.unitId, unit.unitTitle],
       [curriculum.grade, entry.semester, entry.unitId, entry.title]);
   }
+});
+
+const buttonOf = (card, text) => card.all('button').find((b) => b.textContent === text);
+const submit = (card, value) => {
+  card.querySelector('input').value = value;
+  card.querySelector('form').onsubmit({ preventDefault() {} });
+};
+
+test('모든 활성 단원의 모든 문제를 정답으로 풀 수 있다', async () => {
+  for (const entry of units.filter((u) => u.active)) {
+    const app = await openApp({ hash: `#${entry.unitId}` });
+    const { lessons } = JSON.parse(read(entry.data));
+    for (const [i, lesson] of lessons.entries()) {
+      await app.go(app.$('tabs').children[i]);
+      const cards = app.$('lesson').all('section').filter((s) => s.querySelector('form'));
+      assert.equal(cards.length, lesson.problems.length, lesson.id);
+      for (const [j, p] of lesson.problems.entries()) {
+        if (p.type === 'choice') await app.go(buttonOf(cards[j], String(p.answer)));
+        else submit(cards[j], String(p.answer));
+        assert.match(cards[j].className, /solved/, p.id);
+      }
+    }
+    assert.match(app.$('progress').textContent, /모두 맞혔어요/, entry.unitId);
+  }
+});
+
+test('choice 문제는 틀리면 힌트를 보여 주고 맞히면 보기를 잠근다', async () => {
+  const app = await openApp({ hash: '#g2-2-u1' });
+  await app.go(app.$('tabs').children[2]);
+  const card = app.$('lesson').all('section').filter((s) => s.querySelector('form'))[3];
+  assert.equal(card.querySelector('input'), undefined);
+
+  await app.go(buttonOf(card, '4837'));
+  assert.match(card.textContent, /다시 한 번/);
+  assert.doesNotMatch(card.className, /solved/);
+
+  await app.go(buttonOf(card, '4873'));
+  assert.match(card.className, /solved/);
+  assert.ok(buttonOf(card, '4873').disabled && buttonOf(card, '4837').disabled);
+  assert.match(app.$('progress').textContent, /1문제를 맞혔어요/);
+});
+
+test('그림은 문제 위에, 단위는 입력칸 옆에 나온다', async () => {
+  const app = await openApp({ hash: '#g2-2-u5' });
+  const sections = app.$('lesson').all('section');
+  const example = sections.find((s) => s.textContent.startsWith('예제'));
+  assert.deepEqual(example.children.slice(0, 3).map((c) => c.tagName), ['h2', 'div', 'p']);
+
+  const cards = sections.filter((s) => s.querySelector('form'));
+  assert.equal(cards[0].children[0].className, 'visual');
+  assert.equal(cards[0].children[0].all('table').length, 1);
+  const form = cards[4].querySelector('form');
+  assert.deepEqual(form.children.slice(0, 2).map((c) => c.tagName), ['input', 'span']);
+  assert.equal(form.children[1].textContent, '명');
 });

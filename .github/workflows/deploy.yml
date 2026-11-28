@@ -27,7 +27,7 @@ jobs:
       - name: Collect site files
         run: |
           mkdir _site
-          cp -r index.html style.css app.js generator.js data _site/
+          cp -r index.html style.css app.js generator.js visuals.js data _site/
 
       - name: Check data JSON
         run: |

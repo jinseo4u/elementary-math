@@ -1,0 +1,204 @@
+{
+  "grade": 2,
+  "semester": 2,
+  "unitId": "g2-2-u3",
+  "unitTitle": "길이 재기",
+  "unitDescription": "1m를 알고 m와 cm의 관계를 이해하며, 길이의 덧셈과 뺄셈, 길이 어림을 합니다.",
+  "prerequisites": [
+    "2학년 1학기 4단원 길이 재기(1cm)"
+  ],
+  "nextUnits": [
+    "3학년 1학기 길이와 시간"
+  ],
+  "lessons": [
+    {
+      "id": "g2-2-u3-l1",
+      "title": "1m 알기",
+      "explanation": "100cm를 1m라 쓰고 '1미터'라고 읽어요. 1m = 100cm예요. 130cm는 1m보다 30cm 더 길어서 1m 30cm라고 쓰고 '1미터 30센티미터'라고 읽어요.",
+      "example": {
+        "question": "120cm는 몇 m 몇 cm일까요?",
+        "steps": [
+          "100cm는 1m입니다.",
+          "120cm = 100cm + 20cm",
+          "그래서 120cm = 1m 20cm입니다."
+        ],
+        "answer": 120,
+        "answerText": "1m 20cm"
+      },
+      "problems": [
+        {
+          "id": "g2-2-u3-l1-p1",
+          "type": "fill",
+          "question": "1m = □cm",
+          "answer": 100,
+          "hint": "1m는 몇 cm인지 떠올려 보세요.",
+          "solution": "1m = 100cm입니다."
+        },
+        {
+          "id": "g2-2-u3-l1-p2",
+          "type": "fill",
+          "question": "3m = □cm",
+          "answer": 300,
+          "hint": "1m가 100cm이니, 3m는 100cm가 3개예요.",
+          "solution": "3m = 100cm × 3 = 300cm입니다."
+        },
+        {
+          "id": "g2-2-u3-l1-p3",
+          "type": "fill",
+          "question": "500cm = □m",
+          "answer": 5,
+          "hint": "100cm가 몇 개인지 세어 보세요.",
+          "solution": "500cm는 100cm가 5개이므로 5m입니다."
+        },
+        {
+          "id": "g2-2-u3-l1-p4",
+          "type": "fill",
+          "question": "1m 40cm = □cm",
+          "answer": 140,
+          "hint": "1m를 100cm로 바꾸고 40cm를 더해요.",
+          "solution": "1m 40cm = 100cm + 40cm = 140cm입니다."
+        },
+        {
+          "id": "g2-2-u3-l1-p5",
+          "type": "fill",
+          "question": "260cm = 2m □cm",
+          "answer": 60,
+          "hint": "260cm에서 200cm는 2m예요.",
+          "solution": "260cm = 200cm + 60cm = 2m 60cm이므로 □ = 60입니다."
+        }
+      ]
+    },
+    {
+      "id": "g2-2-u3-l2",
+      "title": "길이의 덧셈과 뺄셈",
+      "explanation": "길이를 더하거나 뺄 때는 m는 m끼리, cm는 cm끼리 계산해요. 1m 20cm + 2m 50cm는 m끼리 1 + 2 = 3, cm끼리 20 + 50 = 70이므로 3m 70cm예요.",
+      "example": {
+        "question": "1m 20cm + 2m 50cm는 얼마일까요?",
+        "steps": [
+          "m끼리 더합니다: 1m + 2m = 3m",
+          "cm끼리 더합니다: 20cm + 50cm = 70cm",
+          "그래서 3m 70cm입니다."
+        ],
+        "answer": 370,
+        "answerText": "3m 70cm"
+      },
+      "problems": [
+        {
+          "id": "g2-2-u3-l2-p1",
+          "type": "fill",
+          "question": "2m 30cm + 1m 40cm = 3m □cm",
+          "answer": 70,
+          "hint": "cm끼리 더해 보세요.",
+          "solution": "m끼리 2 + 1 = 3, cm끼리 30 + 40 = 70이므로 3m 70cm입니다."
+        },
+        {
+          "id": "g2-2-u3-l2-p2",
+          "type": "fill",
+          "question": "4m 50cm + 2m 30cm = □m 80cm",
+          "answer": 6,
+          "hint": "m끼리 더해 보세요.",
+          "solution": "m끼리 4 + 2 = 6, cm끼리 50 + 30 = 80이므로 6m 80cm입니다."
+        },
+        {
+          "id": "g2-2-u3-l2-p3",
+          "type": "fill",
+          "question": "5m 80cm − 2m 30cm = 3m □cm",
+          "answer": 50,
+          "hint": "cm끼리 빼 보세요.",
+          "solution": "m끼리 5 − 2 = 3, cm끼리 80 − 30 = 50이므로 3m 50cm입니다."
+        },
+        {
+          "id": "g2-2-u3-l2-p4",
+          "type": "fill",
+          "question": "3m 60cm − 1m 60cm = □m",
+          "answer": 2,
+          "hint": "cm끼리 빼면 0이 돼요.",
+          "solution": "m끼리 3 − 1 = 2, cm끼리 60 − 60 = 0이므로 2m입니다."
+        },
+        {
+          "id": "g2-2-u3-l2-p5",
+          "type": "word",
+          "question": "끈이 4m 70cm 있습니다. 그중 1m 50cm를 사용했습니다. 남은 끈은 몇 cm일까요?",
+          "answer": 320,
+          "unit": "cm",
+          "hint": "먼저 m는 m끼리, cm는 cm끼리 빼고, 마지막에 cm로 바꿔요.",
+          "solution": "4m 70cm − 1m 50cm = 3m 20cm이고, 3m 20cm = 320cm이므로 남은 끈은 320cm입니다."
+        }
+      ]
+    },
+    {
+      "id": "g2-2-u3-l3",
+      "title": "길이 어림하기",
+      "explanation": "자 없이 길이를 짐작하는 것을 어림이라고 해요. 한 걸음, 양팔을 벌린 길이처럼 내 몸의 길이를 알아 두면 어림하기 쉬워요. 어림한 길이는 '약 2m'처럼 '약'을 붙여 말해요.",
+      "example": {
+        "question": "1m 자로 냉장고의 높이를 재었더니 2번보다 조금 짧았습니다. 냉장고의 높이는 약 몇 m일까요?",
+        "steps": [
+          "1m 자로 2번이면 2m입니다.",
+          "2번보다 조금 짧으니 2m에 가깝습니다.",
+          "그래서 냉장고의 높이는 약 2m입니다."
+        ],
+        "answer": 2,
+        "answerText": "약 2m"
+      },
+      "problems": [
+        {
+          "id": "g2-2-u3-l3-p1",
+          "type": "choice",
+          "question": "교실 문의 높이로 알맞은 것을 고르세요.",
+          "answer": "약 2m",
+          "choices": [
+            "약 2m",
+            "약 20cm",
+            "약 20m"
+          ],
+          "hint": "어른 키보다 조금 커요.",
+          "solution": "교실 문은 어른 키보다 조금 크므로 약 2m가 알맞습니다."
+        },
+        {
+          "id": "g2-2-u3-l3-p2",
+          "type": "choice",
+          "question": "새 연필의 길이로 알맞은 것을 고르세요.",
+          "answer": "약 15cm",
+          "choices": [
+            "약 15cm",
+            "약 15m",
+            "약 1m"
+          ],
+          "hint": "손바닥 길이와 비슷해요.",
+          "solution": "연필은 손바닥 길이 정도이므로 약 15cm가 알맞습니다."
+        },
+        {
+          "id": "g2-2-u3-l3-p3",
+          "type": "choice",
+          "question": "버스의 길이로 알맞은 것을 고르세요.",
+          "answer": "약 10m",
+          "choices": [
+            "약 10m",
+            "약 10cm",
+            "약 1m"
+          ],
+          "hint": "교실 길이와 비슷해요.",
+          "solution": "버스는 교실 길이 정도로 길어서 약 10m가 알맞습니다."
+        },
+        {
+          "id": "g2-2-u3-l3-p4",
+          "type": "word",
+          "question": "민지의 한 걸음은 약 50cm입니다. 민지가 4걸음 걸은 거리는 약 몇 m일까요?",
+          "answer": 2,
+          "unit": "m",
+          "hint": "50cm를 4번 더한 다음 m로 바꿔 보세요.",
+          "solution": "50 + 50 + 50 + 50 = 200이므로 약 200cm이고, 200cm = 2m이므로 약 2m입니다."
+        },
+        {
+          "id": "g2-2-u3-l3-p5",
+          "type": "word",
+          "question": "양팔을 벌린 길이가 약 1m인 친구가 칠판의 길이를 재었더니 약 3번이었습니다. 칠판의 길이는 약 몇 m일까요?",
+          "answer": 3,
+          "unit": "m",
+          "hint": "1m가 3번이면 몇 m일까요?",
+          "solution": "약 1m로 3번이므로 칠판의 길이는 약 3m입니다."
+        }
+      ]
+    }
+  ]
+}

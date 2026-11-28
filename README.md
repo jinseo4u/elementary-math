@@ -1,6 +1,6 @@
 # 2학년 수학 학습 페이지
 
-메인 메뉴에서 단원을 골라 설명, 예제, 문제를 웹에서 풀어 봅니다. 지금은 2학기 곱셈구구 단원을 쓸 수 있습니다.
+메인 메뉴에서 단원을 골라 설명, 예제, 문제를 웹에서 풀어 봅니다. 지금은 2학기 6개 단원을 쓸 수 있고, 1학기 단원은 준비 중입니다.
 
 ## 실행
 
@@ -19,7 +19,13 @@ npm run dev
 단원 JSON은 `data/units-grade2-gugudan.json`과 같은 형식으로 만듭니다.
 
 - `grade`, `semester`, `unitId`, `unitTitle`은 메뉴 항목과 같아야 합니다. 차시와 문제의 `id`는 다른 단원과 겹치지 않게 합니다.
-- 문제의 `answer`는 0 이상 9999 이하의 정수만 쓸 수 있습니다.
+- 문제의 `type`이 `choice`이면 `choices`의 보기를 버튼으로 보여 줍니다. `answer`는 보기 중 하나(숫자 또는 글자)여야 합니다.
+- 그 밖의 문제의 `answer`는 0 이상 9999 이하의 정수만 쓸 수 있습니다. `unit`을 넣으면 입력칸 옆에 단위를 보여 줍니다.
+- 문제와 예제의 `visual`은 위쪽에 그림으로 나옵니다.
+  - `{"type": "clock", "hour": 3, "minute": 15}`
+  - `{"type": "table", "title": "…", "headers": [], "rows": [[]]}`
+  - `{"type": "graph", "title": "…", "categories": [], "values": [], "mark": "○"}`
+- 소단원마다 문제는 5개입니다.
 - `example`과 `generator`는 없어도 됩니다. `generator`는 곱셈 문제만 만들 수 있으므로 다른 단원에는 넣지 않습니다.
 
 ## 새 문제 만들기
@@ -42,9 +48,10 @@ npm test
 
 - `index.html`, `style.css`, `app.js`: 화면과 동작
 - `generator.js`: 새 문제, 힌트, 해설 생성
+- `visuals.js`: 시계, 표, 그래프 그림
 - `test/`: 생성한 문제, 메뉴 이동, 단원 데이터 검사
 - `data/curriculum-grade2.json`: 메뉴의 단원 목록
-- `data/units-grade2-gugudan.json`: 단원 데이터
+- `data/units-grade2-*.json`: 단원 데이터
 
 맞힌 문제는 해당 브라우저에만 저장됩니다.
 

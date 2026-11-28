@@ -16,12 +16,12 @@
     {
       "semester": 2,
       "units": [
-        {"unitId": "g2-2-u1", "number": 1, "title": "네 자리 수", "data": "data/units-grade2-s2-four-digit.json", "active": false},
+        {"unitId": "g2-2-u1", "number": 1, "title": "네 자리 수", "data": "data/units-grade2-four-digit.json", "active": true},
         {"unitId": "g2-2-u2", "number": 2, "title": "곱셈구구", "data": "data/units-grade2-gugudan.json", "active": true},
-        {"unitId": "g2-2-u3", "number": 3, "title": "길이 재기", "data": "data/units-grade2-s2-length.json", "active": false},
-        {"unitId": "g2-2-u4", "number": 4, "title": "시각과 시간", "data": "data/units-grade2-s2-time.json", "active": false},
-        {"unitId": "g2-2-u5", "number": 5, "title": "표와 그래프", "data": "data/units-grade2-s2-graphs.json", "active": false},
-        {"unitId": "g2-2-u6", "number": 6, "title": "규칙 찾기", "data": "data/units-grade2-s2-patterns.json", "active": false}
+        {"unitId": "g2-2-u3", "number": 3, "title": "길이 재기", "data": "data/units-grade2-length.json", "active": true},
+        {"unitId": "g2-2-u4", "number": 4, "title": "시각과 시간", "data": "data/units-grade2-time.json", "active": true},
+        {"unitId": "g2-2-u5", "number": 5, "title": "표와 그래프", "data": "data/units-grade2-table-graph.json", "active": true},
+        {"unitId": "g2-2-u6", "number": 6, "title": "규칙 찾기", "data": "data/units-grade2-patterns.json", "active": true}
       ]
     }
   ]

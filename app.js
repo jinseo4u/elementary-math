@@ -39,6 +39,8 @@ function renderProgress() {
   }));
 }
 
+const visualOf = ({ visual }) => (visual ? [Visuals.renderVisual(visual)] : []);
+
 function renderExample(example) {
   const list = el('ol');
   const answer = el('p', { className: 'note', hidden: true }, `정답: ${example.answerText}`);
@@ -48,55 +50,96 @@ function renderExample(example) {
     list.append(el('li', {}, example.steps[shown++]));
     if (shown === example.steps.length) { answer.hidden = false; button.hidden = true; }
   };
-  return el('section', {}, el('h2', {}, '예제'),
+  return el('section', {}, el('h2', {}, '예제'), ...visualOf(example),
     el('p', { className: 'question' }, example.question), list, button, answer);
+}
+
+// 답을 쓰는 입력칸. check는 답을 채점하는 함수
+function inputAnswer(problem, number, check, say) {
+  const input = el('input', { id: `input-${problem.id}`, type: 'text', inputMode: 'numeric', autocomplete: 'off', maxLength: 4 });
+  input.setAttribute('aria-label', `${number}번 답`);
+  const submit = el('button', { type: 'submit' }, '확인');
+  input.oninput = () => say('');
+  return {
+    controls: [input, ...(problem.unit ? [el('span', {}, problem.unit)] : []), submit],
+    onSubmit: () => {
+      const value = input.value.trim();
+      if (!/^\d+$/.test(value)) { say('숫자로 답을 써 주세요.', 'wrong'); return; }
+      if (!check(Number(value))) input.select();
+    },
+    markSolved: () => {
+      input.value = problem.answer;
+      input.readOnly = true;
+      submit.disabled = true;
+    },
+  };
+}
+
+// 보기를 누르면 바로 채점함
+function choiceAnswer(problem, number, check) {
+  const buttons = problem.choices.map((choice) => {
+    const button = el('button', { type: 'button', className: 'secondary' }, String(choice));
+    button.onclick = () => check(choice);
+    return button;
+  });
+  const group = el('div', { className: 'choices' }, ...buttons);
+  group.setAttribute('role', 'group');
+  group.setAttribute('aria-label', `${number}번 보기`);
+  return {
+    group,
+    controls: problem.unit ? [el('span', {}, `단위: ${problem.unit}`)] : [],
+    markSolved: () => buttons.forEach((button, i) => {
+      button.disabled = true;
+      if (problem.choices[i] === problem.answer) button.className = 'secondary answer';
+    }),
+  };
 }
 
 // record: 맞힌 문제를 기록할 Set, onSolved: 새로 맞혔을 때 할 일
 function renderProblem(problem, number, record, onSolved = () => {}) {
-  const inputId = `input-${problem.id}`;
-  const input = el('input', { id: inputId, type: 'text', inputMode: 'numeric', autocomplete: 'off', maxLength: 4 });
-  input.setAttribute('aria-label', `${number}번 답`);
-  const submit = el('button', { type: 'submit' }, '확인');
   const hintButton = el('button', { type: 'button', className: 'secondary' }, '힌트');
   const solutionButton = el('button', { type: 'button', className: 'secondary', hidden: true }, '풀이 보기');
   const feedback = el('p', { className: 'feedback' });
   feedback.setAttribute('aria-live', 'polite');
   const hint = el('p', { className: 'note', hidden: true }, `💡 ${problem.hint}`);
   const solution = el('p', { className: 'note', hidden: true }, `📝 ${problem.solution}`);
-  const form = el('form', { className: 'row' }, input, problem.unit || '', submit, hintButton, solutionButton);
-  const card = el('section', {}, el('p', { className: 'question' }, `${number}. ${problem.question}`),
-    form, feedback, hint, solution);
-
   const say = (text, kind = '') => { feedback.textContent = text; feedback.className = `feedback ${kind}`; };
+
   const markSolved = () => {
     card.classList.add('solved');
-    input.value = problem.answer;
-    input.readOnly = true;
-    submit.disabled = true;
+    answer.markSolved();
     solutionButton.hidden = false;
     say('⭕ 정답이에요!', 'correct');
   };
-
-  hintButton.onclick = () => { hint.hidden = !hint.hidden; };
-  solutionButton.onclick = () => { solution.hidden = !solution.hidden; };
-  input.oninput = () => say('');
-  form.onsubmit = (event) => {
-    event.preventDefault();
-    if (record.has(problem.id)) return;
-    const value = input.value.trim();
-    if (!/^\d+$/.test(value)) { say('숫자로 답을 써 주세요.', 'wrong'); return; }
-    if (Number(value) === problem.answer) {
+  // 맞았는지 돌려줌
+  const check = (value) => {
+    if (record.has(problem.id)) return true;
+    if (value === problem.answer) {
       record.add(problem.id);
       markSolved();
       onSolved();
-    } else {
-      // 한 번 틀린 뒤에는 힌트와 풀이를 볼 수 있게 함
-      say('다시 한 번 생각해 볼까요?', 'wrong');
-      hint.hidden = false;
-      solutionButton.hidden = false;
-      input.select();
+      return true;
     }
+    // 한 번 틀린 뒤에는 힌트와 풀이를 볼 수 있게 함
+    say('다시 한 번 생각해 볼까요?', 'wrong');
+    hint.hidden = false;
+    solutionButton.hidden = false;
+    return false;
+  };
+
+  const answer = problem.type === 'choice'
+    ? choiceAnswer(problem, number, check)
+    : inputAnswer(problem, number, check, say);
+  const form = el('form', { className: 'row' }, ...answer.controls, hintButton, solutionButton);
+  const card = el('section', {}, ...visualOf(problem),
+    el('p', { className: 'question' }, `${number}. ${problem.question}`),
+    ...(answer.group ? [answer.group] : []), form, feedback, hint, solution);
+
+  hintButton.onclick = () => { hint.hidden = !hint.hidden; };
+  solutionButton.onclick = () => { solution.hidden = !solution.hidden; };
+  form.onsubmit = (event) => {
+    event.preventDefault();
+    if (!record.has(problem.id)) answer.onSubmit?.();
   };
 
   if (record.has(problem.id)) markSolved();
