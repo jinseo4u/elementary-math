@@ -5,19 +5,19 @@
     {
       "semester": 1,
       "units": [
-        {"unitId": "g2-1-u1", "number": 1, "title": "세 자리 수", "data": "data/units-grade2-s1-three-digit.json", "active": false},
-        {"unitId": "g2-1-u2", "number": 2, "title": "여러 가지 도형", "data": "data/units-grade2-s1-shapes.json", "active": false},
-        {"unitId": "g2-1-u3", "number": 3, "title": "덧셈과 뺄셈", "data": "data/units-grade2-s1-add-sub.json", "active": false},
-        {"unitId": "g2-1-u4", "number": 4, "title": "길이 재기", "data": "data/units-grade2-s1-length.json", "active": false},
-        {"unitId": "g2-1-u5", "number": 5, "title": "분류하기", "data": "data/units-grade2-s1-sorting.json", "active": false},
-        {"unitId": "g2-1-u6", "number": 6, "title": "곱셈", "data": "data/units-grade2-s1-multiplication.json", "active": false}
+        {"unitId": "g2-1-u1", "number": 1, "title": "세 자리 수", "data": "data/units-grade2-s1-three-digit.json", "active": true},
+        {"unitId": "g2-1-u2", "number": 2, "title": "여러 가지 도형", "data": "data/units-grade2-s1-shapes.json", "active": true},
+        {"unitId": "g2-1-u3", "number": 3, "title": "덧셈과 뺄셈", "data": "data/units-grade2-s1-add-sub.json", "active": true},
+        {"unitId": "g2-1-u4", "number": 4, "title": "길이 재기", "data": "data/units-grade2-s1-length.json", "active": true},
+        {"unitId": "g2-1-u5", "number": 5, "title": "분류하기", "data": "data/units-grade2-s1-sorting.json", "active": true},
+        {"unitId": "g2-1-u6", "number": 6, "title": "곱셈", "data": "data/units-grade2-s1-multiplication.json", "active": true}
       ]
     },
     {
       "semester": 2,
       "units": [
         {"unitId": "g2-2-u1", "number": 1, "title": "네 자리 수", "data": "data/units-grade2-four-digit.json", "active": true},
-        {"unitId": "g2-2-u2", "number": 2, "title": "곱셈구구", "data": "data/units-grade2-gugudan.json", "active": true},
+        {"unitId": "g2-2-u2", "number": 2, "title": "곱셈구구단", "data": "data/units-grade2-gugudan.json", "active": true},
         {"unitId": "g2-2-u3", "number": 3, "title": "길이 재기", "data": "data/units-grade2-length.json", "active": true},
         {"unitId": "g2-2-u4", "number": 4, "title": "시각과 시간", "data": "data/units-grade2-time.json", "active": true},
         {"unitId": "g2-2-u5", "number": 5, "title": "표와 그래프", "data": "data/units-grade2-table-graph.json", "active": true},

@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { clockAngles, renderVisual } = require('../visuals.js');
+const { clockAngles, renderVisual, shapes } = require('../visuals.js');
 
 // visuals.js가 쓰는 DOM 기능만 흉내 낸다.
 class Node {
@@ -74,4 +74,42 @@ test('그래프는 아래에서부터 값만큼 ○를 쌓는다', () => {
   const rows = graph.all('tbody')[0].all('tr').map((tr) => tr.children.map((c) => c.textContent));
   assert.deepEqual(rows, [['3', '', '○', ''], ['2', '○', '○', ''], ['1', '○', '○', '']]);
   assert.deepEqual(graph.all('tfoot')[0].all('th').map((c) => c.textContent), ['축구', '수영', '야구']);
+});
+
+test('도형은 이름에 맞는 수의 꼭짓점을 가지고, 설명에 이름이 드러나지 않는다', () => {
+  const corners = { triangle: 3, square: 4, rectangle: 4, pentagon: 5, hexagon: 6 };
+  assert.deepEqual([...shapes].sort(), Object.keys(corners).sort());
+  for (const [shape, count] of Object.entries(corners)) {
+    const [svg] = draw({ type: 'shape', shape }).children;
+    assert.equal(svg.all('polygon')[0].attributes.points.split(' ').length, count, shape);
+    assert.equal(svg.attributes['aria-label'], '도형 그림');
+  }
+});
+
+test('정사각형은 가로와 세로가 같고 직사각형은 다르다', () => {
+  const size = (shape) => {
+    const points = draw({ type: 'shape', shape }).all('polygon')[0].attributes.points.split(' ').map((p) => p.split(',').map(Number));
+    return [0, 1].map((axis) => Math.max(...points.map((p) => p[axis])) - Math.min(...points.map((p) => p[axis])));
+  };
+  assert.equal(size('square')[0], size('square')[1]);
+  assert.ok(size('rectangle')[0] > size('rectangle')[1]);
+});
+
+test('모르는 도형이면 그림 없이 빈 칸만 만든다', () => {
+  assert.equal(draw({ type: 'shape', shape: 'star' }).children.length, 0);
+});
+
+test('자는 0~15cm이고 막대는 from 눈금부터 to 눈금까지 놓인다', () => {
+  const ruler = draw({ type: 'ruler', from: 3, to: 11 });
+  const numbers = ruler.all('text');
+  assert.deepEqual(numbers.map((n) => n.textContent), Array.from({ length: 16 }, (_, i) => String(i)));
+  const bar = ruler.all('rect').find((r) => r.attributes.class === 'bar').attributes;
+  assert.equal(bar.x, numbers[3].attributes.x);
+  assert.equal(Number(bar.x) + Number(bar.width), Number(numbers[11].attributes.x));
+});
+
+test('묶음 그림은 item을 size개씩 groups묶음 보여 준다', () => {
+  const [box] = draw({ type: 'groups', groups: 4, size: 2, item: '🍎' }).children;
+  assert.equal(box.children.length, 4);
+  for (const group of box.children) assert.deepEqual(group.children.map((c) => c.textContent), ['🍎', '🍎']);
 });

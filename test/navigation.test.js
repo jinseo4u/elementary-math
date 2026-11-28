@@ -99,18 +99,36 @@ test('메인 메뉴에 제목과 학기별 단원이 순서대로 나온다', as
   assert.deepEqual(app.$('semesters').all('h2').map((h) => h.textContent), ['1학기', '2학기']);
   assert.deepEqual(app.unitButtons().map((b) => b.children[0].textContent), [
     '1. 세 자리 수', '2. 여러 가지 도형', '3. 덧셈과 뺄셈', '4. 길이 재기', '5. 분류하기', '6. 곱셈',
-    '1. 네 자리 수', '2. 곱셈구구', '3. 길이 재기', '4. 시각과 시간', '5. 표와 그래프', '6. 규칙 찾기',
+    '1. 네 자리 수', '2. 곱셈구구단', '3. 길이 재기', '4. 시각과 시간', '5. 표와 그래프', '6. 규칙 찾기',
   ]);
 });
 
-test('2학기 단원만 누를 수 있고 1학기는 준비 중이다', async () => {
+// 첫 단원(1학기 1단원)만 준비 중으로 바꾼 메뉴
+const withInactive = () => {
+  const changed = structuredClone(curriculum);
+  changed.semesters[0].units[0].active = false;
+  return { 'data/curriculum-grade2.json': JSON.stringify(changed) };
+};
+
+test('12개 단원을 모두 열 수 있다', async () => {
   const app = await openApp();
-  for (const [i, button] of app.unitButtons().entries()) {
-    const ready = units[i].semester === 2;
-    assert.equal(button.disabled, !ready, button.textContent);
-    assert.equal(button.textContent.includes('준비 중'), !ready, button.textContent);
-    if (!ready) await app.go(button);
+  assert.equal(app.unitButtons().length, 12);
+  for (const [i, entry] of units.entries()) {
+    const button = app.unitButtons()[i];
+    assert.ok(entry.active && !button.disabled, entry.unitId);
+    await app.go(button);
+    assert.ok(onUnit(app), entry.unitId);
+    assert.equal(app.$('title').textContent, entry.title);
+    await app.go(app.$('home'));
   }
+});
+
+test('active가 false인 단원은 준비 중이고 누를 수 없다', async () => {
+  const app = await openApp({ files: withInactive() });
+  const [button] = app.unitButtons();
+  assert.ok(button.disabled);
+  assert.match(button.textContent, /준비 중/);
+  await app.go(button);
   assert.ok(onMenu(app));
   assert.equal(app.context.location.hash, '');
 });
@@ -120,7 +138,7 @@ test('단원에 들어갔다가 메인 메뉴로 돌아온다', async () => {
   await app.go(app.unitButton('곱셈구구'));
   assert.ok(onUnit(app));
   assert.equal(app.context.location.hash, `#${GUGUDAN}`);
-  assert.equal(app.$('title').textContent, '곱셈구구');
+  assert.equal(app.$('title').textContent, '곱셈구구단');
   assert.equal(app.$('tabs').children.length, 3);
 
   await app.go(app.$('home'));
@@ -162,7 +180,7 @@ test('뒤로 가기처럼 주소가 바뀌면 화면도 바뀐다', async () => 
 
 test('준비 중이거나 없는 단원 주소는 메인 메뉴를 보여 준다', async () => {
   for (const hash of ['#g2-1-u1', '#없는단원']) {
-    const app = await openApp({ hash });
+    const app = await openApp({ hash, files: withInactive() });
     assert.ok(onMenu(app), hash);
     assert.deepEqual(app.requested, ['data/curriculum-grade2.json'], hash);
   }
@@ -181,7 +199,6 @@ test('불러오는 중에 메뉴로 나가면 늦게 온 단원이 화면을 덮
 test('JSON을 추가하고 활성화하면 새 단원이 열린다 (예제, generator 없이도)', async () => {
   const changed = structuredClone(curriculum);
   const entry = changed.semesters[0].units[0];
-  entry.active = true;
   const unit = {
     grade: 2, semester: 1, unitId: entry.unitId, unitTitle: entry.title, unitDescription: '설명',
     lessons: [{ id: 'g2-1-u1-l1', title: '백', explanation: '설명',
@@ -196,7 +213,7 @@ test('JSON을 추가하고 활성화하면 새 단원이 열린다 (예제, gene
 
 test('단원 파일이 없으면 안내하고 메뉴로 돌아갈 수 있다', async () => {
   const changed = structuredClone(curriculum);
-  changed.semesters[0].units[0].active = true;
+  changed.semesters[0].units[0].data = 'data/없는파일.json';
   const app = await openApp({ files: { 'data/curriculum-grade2.json': JSON.stringify(changed) } });
   await app.go(app.unitButton('세 자리 수'));
   assert.equal(app.$('title').textContent, '문제를 불러오지 못했어요');

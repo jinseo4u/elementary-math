@@ -1,6 +1,6 @@
 # 2학년 수학 학습 페이지
 
-메인 메뉴에서 단원을 골라 설명, 예제, 문제를 웹에서 풀어 봅니다. 지금은 2학기 6개 단원을 쓸 수 있고, 1학기 단원은 준비 중입니다.
+메인 메뉴에서 단원을 골라 설명, 예제, 문제를 웹에서 풀어 봅니다. 1·2학기 12개 단원을 모두 쓸 수 있습니다.
 
 ## 실행
 
@@ -25,6 +25,9 @@ npm run dev
   - `{"type": "clock", "hour": 3, "minute": 15}`
   - `{"type": "table", "title": "…", "headers": [], "rows": [[]]}`
   - `{"type": "graph", "title": "…", "categories": [], "values": [], "mark": "○"}`
+  - `{"type": "shape", "shape": "triangle"}` (`triangle`, `square`, `rectangle`, `pentagon`, `hexagon`)
+  - `{"type": "ruler", "from": 2, "to": 7}` (0~15cm, 문제의 정답은 `to − from`)
+  - `{"type": "groups", "groups": 4, "size": 2, "item": "●"}`
 - 소단원마다 문제는 5개입니다.
 - `example`과 `generator`는 없어도 됩니다. `generator`는 곱셈 문제만 만들 수 있으므로 다른 단원에는 넣지 않습니다.
 
@@ -48,7 +51,7 @@ npm test
 
 - `index.html`, `style.css`, `app.js`: 화면과 동작
 - `generator.js`: 새 문제, 힌트, 해설 생성
-- `visuals.js`: 시계, 표, 그래프 그림
+- `visuals.js`: 시계, 표, 그래프, 도형, 자, 묶음 그림
 - `test/`: 생성한 문제, 메뉴 이동, 단원 데이터 검사
 - `data/curriculum-grade2.json`: 메뉴의 단원 목록
 - `data/units-grade2-*.json`: 단원 데이터

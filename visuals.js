@@ -7,13 +7,17 @@
     return { hour: (hour % 12) * 30 + minute * 0.5, minute: minute * 6 };
   }
 
-  function drawClock({ hour, minute }, doc) {
-    const svg = (tag, attrs, ...children) => {
+  function svgMaker(doc) {
+    return (tag, attrs, ...children) => {
       const node = doc.createElementNS(SVG_NS, tag);
       for (const [name, value] of Object.entries(attrs)) node.setAttribute(name, String(value));
       node.append(...children);
       return node;
     };
+  }
+
+  function drawClock({ hour, minute }, doc) {
+    const svg = svgMaker(doc);
     const angles = clockAngles(hour, minute);
     // 바늘은 12시 방향으로 그린 뒤 가운데를 중심으로 돌린다.
     const hand = (name, length) => svg('line', {
@@ -72,17 +76,76 @@
         ...categories.map((name) => el('th', { scope: 'col' }, name)))));
   }
 
-  const DRAWERS = { clock: drawClock, table: drawTable, graph: drawGraph };
+  // 꼭짓점 좌표. 오각형과 육각형은 정다각형
+  const SHAPES = {
+    triangle: [[0, -70], [78, 62], [-78, 62]],
+    square: [[-65, -65], [65, -65], [65, 65], [-65, 65]],
+    rectangle: [[-90, -52], [90, -52], [90, 52], [-90, 52]],
+    pentagon: regularPolygon(5, -90),
+    hexagon: regularPolygon(6, 0),
+  };
+
+  // start: 첫 꼭짓점의 각도(도). 0은 오른쪽, -90은 위쪽
+  function regularPolygon(sides, start) {
+    return Array.from({ length: sides }, (_, i) => {
+      const radian = ((start + (360 / sides) * i) * Math.PI) / 180;
+      return [Number((75 * Math.cos(radian)).toFixed(2)), Number((75 * Math.sin(radian)).toFixed(2))];
+    });
+  }
+
+  function drawShape({ shape }, doc) {
+    if (!SHAPES[shape]) return undefined;
+    const svg = svgMaker(doc);
+    // 설명에 도형 이름을 넣으면 정답이 드러남
+    return svg('svg', { class: 'shape', viewBox: '-100 -85 200 170', role: 'img', 'aria-label': '도형 그림' },
+      svg('polygon', { points: SHAPES[shape].map((point) => point.join(',')).join(' ') }));
+  }
+
+  const RULER_CM = 15;
+  const CM = 20; // 1cm의 그림 속 길이
+  const rulerX = (cm) => 15 + cm * CM;
+
+  function drawRuler({ from, to }, doc) {
+    const svg = svgMaker(doc);
+    const marks = Array.from({ length: RULER_CM + 1 }, (_, cm) => [
+      svg('line', { class: 'tick', x1: rulerX(cm), y1: 40, x2: rulerX(cm), y2: 54 }),
+      svg('text', { class: 'number', x: rulerX(cm), y: 71, 'text-anchor': 'middle' }, String(cm)),
+    ]).flat();
+    // 막대의 양 끝이 어느 눈금인지 보이도록 점선을 내림
+    const guides = [from, to].map((cm) => svg('line', {
+      class: 'guide', x1: rulerX(cm), y1: 8, x2: rulerX(cm), y2: 40,
+    }));
+    return svg('svg', { class: 'ruler', viewBox: `0 0 ${rulerX(RULER_CM) + 15} 86`, role: 'img', 'aria-label': '자와 막대 그림' },
+      svg('rect', { class: 'body', x: 4, y: 40, width: rulerX(RULER_CM) + 7, height: 42, rx: 4 }),
+      ...marks,
+      svg('rect', { class: 'bar', x: rulerX(from), y: 10, width: (to - from) * CM, height: 18 }),
+      ...guides);
+  }
+
+  // item은 글자나 그림 문자라서 SVG 대신 HTML로 그려 좁은 화면에서 줄이 바뀌게 함
+  function drawGroups({ groups, size, item }, doc) {
+    const el = maker(doc);
+    return el('div', { className: 'groups' }, ...Array.from({ length: groups }, () =>
+      el('div', { className: 'group' }, ...Array.from({ length: size }, () => el('span', {}, item)))));
+  }
+
+  const DRAWERS = {
+    clock: drawClock, table: drawTable, graph: drawGraph,
+    shape: drawShape, ruler: drawRuler, groups: drawGroups,
+  };
 
   function renderVisual(visual, doc = document) {
     const wrapper = maker(doc)('div', { className: 'visual' });
     const draw = DRAWERS[visual.type];
-    // 모르는 그림이 있어도 문제는 보이게 함
-    if (draw) wrapper.append(draw(visual, doc));
+    // 모르는 그림이나 도형이 있어도 문제는 보이게 함
+    const picture = draw?.(visual, doc);
+    if (picture) wrapper.append(picture);
     return wrapper;
   }
 
   exports.clockAngles = clockAngles;
   exports.renderVisual = renderVisual;
   exports.types = Object.keys(DRAWERS);
+  exports.shapes = Object.keys(SHAPES);
+  exports.rulerLength = RULER_CM;
 })(typeof module === 'object' ? module.exports : (window.Visuals = {}));

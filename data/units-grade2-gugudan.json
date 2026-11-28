@@ -2,7 +2,7 @@
   "grade": 2,
   "semester": 2,
   "unitId": "g2-2-u2",
-  "unitTitle": "곱셈구구",
+  "unitTitle": "곱셈구구단",
   "unitDescription": "같은 수를 여러 번 더하는 것을 곱셈으로 나타내고, 2단부터 9단까지와 1단, 0의 곱을 익힙니다.",
   "prerequisites": ["2학년 1학기 6단원 곱셈(묶어 세기, 몇의 몇 배)"],
   "nextUnits": ["3학년 1학기 곱셈", "3학년 1학기 나눗셈"],

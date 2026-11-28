@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { types: VISUAL_TYPES } = require('../visuals.js');
+const { types: VISUAL_TYPES, shapes: SHAPES, rulerLength } = require('../visuals.js');
 
 const dataDir = path.join(__dirname, '..', 'data');
 const units = fs.readdirSync(dataDir)
@@ -11,8 +11,9 @@ const units = fs.readdirSync(dataDir)
 const lessons = units.flatMap((u) => u.lessons);
 const problems = lessons.flatMap((l) => l.problems);
 
-test('2학기 6개 단원의 데이터가 있다', () => {
-  assert.deepEqual(units.map((u) => u.unitId).sort(), [1, 2, 3, 4, 5, 6].map((n) => `g2-2-u${n}`));
+test('1·2학기 12개 단원의 데이터가 있다', () => {
+  assert.deepEqual(units.map((u) => u.unitId).sort(),
+    [1, 2].flatMap((s) => [1, 2, 3, 4, 5, 6].map((n) => `g2-${s}-u${n}`)));
 });
 
 test('소단원마다 문제가 5개이다', () => {
@@ -48,11 +49,25 @@ test('그림 데이터가 올바르다', () => {
       assert.ok(Number.isInteger(visual.minute) && visual.minute >= 0 && visual.minute < 60, id);
     } else if (visual.type === 'table') {
       for (const row of visual.rows) assert.equal(row.length, visual.headers.length, id);
+    } else if (visual.type === 'shape') {
+      assert.ok(SHAPES.includes(visual.shape), id);
+    } else if (visual.type === 'ruler') {
+      const { from, to } = visual;
+      assert.ok(Number.isInteger(from) && Number.isInteger(to) && from >= 0 && from < to && to <= rulerLength, id);
+    } else if (visual.type === 'groups') {
+      assert.ok([visual.groups, visual.size].every((n) => Number.isInteger(n) && n > 0) && visual.item, id);
     } else {
       assert.equal(visual.values.length, visual.categories.length, id);
       assert.ok(visual.values.every((v) => Number.isInteger(v) && v >= 0) && visual.mark, id);
     }
   }
+});
+
+test('자 그림 문제의 정답(길이)은 to − from이다', () => {
+  const items = lessons.flatMap((l) => [...l.problems, ...(l.example ? [{ ...l.example, id: `${l.id} 예제` }] : [])])
+    .filter((x) => x.visual?.type === 'ruler');
+  assert.ok(items.length > 0);
+  for (const { id, answer, visual } of items) assert.equal(answer, visual.to - visual.from, id);
 });
 
 test('표의 합계는 각 칸을 더한 값이다', () => {
